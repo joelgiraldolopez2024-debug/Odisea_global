@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Odisea Global | Agencia de Viajes Premium</title>
+    <!-- Enlace a la hoja de estilos -->
+    <link rel="stylesheet" href="css/style.css">
+    <!-- Fuentes Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <!-- 🚪 FORMULARIO DE ACCESO CON SELECCIÓN DE ROL Y CREDENCIALES -->
+    <div id="muro-registro" class="gateway-overlay">
+        <div class="gateway-card">
+            <div class="gateway-logo">
+                <h2>🌍 Odisea<span>Global</span></h2>
+            </div>
+            <h2>¡Bienvenido a Odisea Global! ✈️</h2>
+            <p>Selecciona tu rol de acceso e ingresa tus datos para continuar.</p>
+            
+            <form id="form-inicial" onsubmit="event.preventDefault(); verificarAccesoRol();">
+                <div class="input-grupo-gateway">
+                    <label for="reg-rol">Seleccionar Rol *</label>
+                    <select id="reg-rol" onchange="cambiarVistaRolFormulario()">
+                        <option value="cliente">Cliente / Viajero</option>
+                        <option value="admin">Administrador</option>
+                    </select>
+                </div>
+
+                <div class="input-grupo-gateway">
+                    <label for="reg-nombre">Nombre Completo * (Solo letras)</label>
+                    <input type="text" id="reg-nombre" placeholder="Ej: Joel Giraldo" required>
+                </div>
+                
+                <div class="input-grupo-gateway">
+                    <label for="reg-tel">Teléfono / WhatsApp * (Solo números)</label>
+                    <input type="tel" id="reg-tel" placeholder="Ej: 3113924038" required>
+                </div>
+
+                <!-- CAMPO SECRETO DE CONTRASEÑA (Encriptado visualmente para Administrador) -->
+                <div class="input-grupo-gateway" id="grupo-admin-pass" style="display: none;">
+                    <label for="reg-admin-pass">Código de Administrador (Encriptado) *</label>
+                    <input type="password" id="reg-admin-pass" placeholder="Ingresa el código secreto">
+                </div>
+                
+                <button type="submit" class="btn-gateway-submit">
+                    🚀 Ingresar a la Página Web
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- 🌐 PÁGINA WEB COMPLETA (OCULTA POR DEFECTO HASTA TERMINAR EL ACCESO) -->
+    <div id="contenido-web" style="display: none;">
+        
+        <!-- ⚙️ PANEL DE CONTROL PROFESIONAL DE ADMINISTRADOR (EXCLUSIVO JOEL) -->
+        <div id="panel-admin-exclusivo" style="display: none; background: #0f172a; color: #f8fafc; padding: 25px 0; border-bottom: 4px solid #38bdf8; font-family: 'Poppins', sans-serif;">
+            <div class="container">
+                
+                <!-- Header del Admin -->
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; border-bottom: 1px solid #1e293b; padding-bottom: 15px;">
+                    <div>
+                        <h3 style="color: #38bdf8; margin: 0; font-size: 22px; display: flex; align-items: center; gap: 8px;">
+                            ⚡ OdiseaControl <span style="font-size: 12px; background: #0284c7; color: #fff; padding: 2px 8px; border-radius: 12px;">v2.0 PRO</span>
+                        </h3>
+                        <p style="margin: 3px 0 0 0; font-size: 13px; color: #94a3b8;">Sesión iniciada: <strong>Joel Giraldo (SuperAdmin)</strong></p>
+                    </div>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <span id="badge-notif" style="background: #ef4444; color: #fff; padding: 4px 10px; border-radius: 20px; font-weight: bold; font-size: 12px; display: flex; align-items: center; gap: 5px;">
+                            🔴 3 Cotizaciones Nuevas
+                        </span>
+                        <button onclick="actualizarMetricasSimuladas()" style="background: #334155; color: #38bdf8; border: 1px solid #38bdf8; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600;">🔄 Refrescar Datos</button>
+                    </div>
+                </div>
+
+                <!-- Pestañas de Navegación del Admin -->
+                <div style="display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid #1e293b;">
+                    <button class="tab-admin active" onclick="cambiarSeccionAdmin('metricas', this)" style="background: #1e293b; color: #38bdf8; border: none; padding: 10px 18px; border-radius: 8px 8px 0 0; cursor: pointer; font-weight: 600; font-size: 13px;">📊 Métricas & KPIs</button>
+                    <button class="tab-admin" onclick="cambiarSeccionAdmin('leads', this)" style="background: transparent; color: #94a3b8; border: none; padding: 10px 18px; border-radius: 8px 8px 0 0; cursor: pointer; font-weight: 600; font-size: 13px;">📋 Gestión de Leads (<span id="count-leads">3</span>)</button>
+                    <button class="tab-admin" onclick="cambiarSeccionAdmin('inventario', this)" style="background: transparent; color: #94a3b8; border: none; padding: 10px 18px; border-radius: 8px 8px 0 0; cursor: pointer; font-weight: 600; font-size: 13px;">🗺️ Control de Catalogo</button>
+                </div>
+
+                <!-- SECCIÓN 1: METRICAS -->
+                <div id="admin-sec-metricas">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; margin-bottom: 20px;">
+                        <div style="background: #1e293b; padding: 18px; border-radius: 10px; border-left: 4px solid #38bdf8;">
+                            <span style="font-size: 12px; color: #94a3b8;">Ingresos Mensuales</span>
+                            <h4 id="kpi-ventas" style="margin: 5px 0; font-size: 22px; color: #f8fafc;">$ 52.400.000 COP</h4>
+                            <div style="background: #0f172a; border-radius: 10px; height: 6px; overflow: hidden; margin-top: 8px;">
+                                <div id="bar-ventas" style="width: 85%; background: #38bdf8; height: 100%;"></div>
+                            </div>
+                            <span style="font-size: 10px; color: #38bdf8;">85% de la meta alcanzada</span>
+                        </div>
+
+                        <div style="background: #1e293b; padding: 18px; border-radius: 10px; border-left: 4px solid #f59e0b;">
+                            <span style="font-size: 12px; color: #94a3b8;">Conversion de Clientes</span>
+                            <h4 style="margin: 5px 0; font-size: 22px; color: #f8fafc;">68.4 %</h4>
+                            <div style="background: #0f172a; border-radius: 10px; height: 6px; overflow: hidden; margin-top: 8px;">
+                                <div style="width: 68%; background: #f59e0b; height: 100%;"></div>
+                            </div>
+                            <span style="font-size: 10px; color: #f59e0b;">+4.2% vs mes anterior</span>
+                        </div>
+
+                        <div style="background: #1e293b; padding: 18px; border-radius: 10px; border-left: 4px solid #10b981;">
+                            <span style="font-size: 12px; color: #94a3b8;">Paquete Estrella</span>
+                            <h4 style="margin: 5px 0; font-size: 18px; color: #f8fafc;">Cancún All-Inclusive</h4>
+                            <span style="font-size: 11px; color: #10b981;">🔥 38 reservas activas</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECCIÓN 2: TABLA INTERACTIVA DE LEADS -->
+                <div id="admin-sec-leads" style="display: none;">
+                    <div style="background: #1e293b; padding: 18px; border-radius: 10px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 10px;">
+                            <h4 style="margin: 0; color: #f8fafc; font-size: 15px;">📥 CRM de Solicitudes en Tiempo Real</h4>
+                            <input type="text" id="filter-lead" onkeyup="filtrarTablaLeads()" placeholder="🔍 Buscar cliente por nombre..." style="background: #0f172a; border: 1px solid #334155; color: #fff; padding: 6px 12px; border-radius: 6px; font-size: 12px;">
+                        </div>
+
+                        <div style="overflow-x: auto;">
+                            <table style="width: 100%; text-align: left; border-collapse: collapse; font-size: 13px;" id="tabla-leads-admin">
+                                <thead>
+                                    <tr style="border-bottom: 2px solid #334155; color: #38bdf8;">
+                                        <th style="padding: 10px;">Cliente</th>
+                                        <th style="padding: 10px;">Teléfono</th>
+                                        <th style="padding: 10px;">Destino</th>
+                                        <th style="padding: 10px;">Estado</th>
+                                        <th style="padding: 10px;">Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr style="border-bottom: 1px solid #334155;">
+                                        <td style="padding: 10px; font-weight: 600;">Carlos Mendoza</td>
+                                        <td style="padding: 10px;">3124567890</td>
+                                        <td style="padding: 10px;">San Andrés 7 Colores</td>
+                                        <td style="padding: 10px;"><span class="badge-status" style="background: #f59e0b22; color: #f59e0b; padding: 3px 8px; border-radius: 12px; font-size: 11px;">⏳ Pendiente</span></td>
+                                        <td style="padding: 10px;">
+                                            <button onclick="cambiarEstadoLead(this)" style="background: #10b981; color: #fff; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 11px;">Mark Contactado</button>
+                                            <button onclick="contactarClienteWA('3124567890', 'Carlos')" style="background: #25d366; color: #fff; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 11px;">💬 WhatsApp</button>
+                                        </td>
+                                    </tr>
+                                    <tr style="border-bottom: 1px solid #334155;">
+                                        <td style="padding: 10px; font-weight: 600;">María Fernanda Gómez</td>
+                                        <td style="padding: 10px;">3009876543</td>
+                                        <td style="padding: 10px;">Cancún & Riviera Maya</td>
+                                        <td style="padding: 10px;"><span class="badge-status" style="background: #10b98122; color: #10b981; padding: 3px 8px; border-radius: 12px; font-size: 11px;">✅ Contactado</span></td>
+                                        <td style="padding: 10px;">
+                                            <button onclick="contactarClienteWA('3009876543', 'María')" style="background: #25d366; color: #fff; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 11px;">💬 WhatsApp</button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECCIÓN 3: CONTROL DE CATÁLOGO -->
+                <div id="admin-sec-inventario" style="display: none;">
+                    <div style="background: #1e293b; padding: 18px; border-radius: 10px;">
+                        <h4 style="margin-top: 0; color: #f8fafc; font-size: 15px;">⚙️ Ajustes Rápidos de Catálogo</h4>
+                        <p style="font-size: 12px; color: #94a3b8;">Los cambios realizados aquí afectan las promociones visibles para los clientes.</p>
+                        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                            <button onclick="alert('⚡ Promoción relámpago activada: 15% DTO en San Andrés')" style="background: #ef4444; color: #fff; border: none; padding: 8px 14px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600;">🔥 Activar Flash Sale (-15%)</button>
+                            <button onclick="alert('📦 Inventario de cupos actualizado')" style="background: #0284c7; color: #fff; border: none; padding: 8px 14px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600;">📦 Recargar Cupos Aéreos</button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- CABECERA Y NAVEGACIÓN -->
+        <header class="site-header">
+            <div class="container header-container">
+                <div class="logo">
+                    <h2>🌍 Odisea<span>Global</span></h2>
+                </div>
+                <nav class="main-nav">
+                    <ul>
+                        <li><a href="#inicio">Inicio</a></li>
+                        <li><a href="#destinos">Destinos VIP</a></li>
+                        <li><a href="#galeria">Galería</a></li>
+                        <li><a href="#elegirnos">¿Por qué elegirnos?</a></li>
+                        <li><a href="#seguridad">Seguros & Garantía</a></li>
+                        <li><a href="#testimonios">Reseñas</a></li>
+                        <li><a href="javascript:void(0)" onclick="abrirModal('Asesoría Personalizada Directa', '$ 0 COP')" class="btn-cta">⚡ Hablar con Asesor</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </header>
+
+        <!-- HERO CON BUSCADOR DE RESERVA -->
+        <section id="inicio" class="hero">
+            <div class="hero-overlay"></div>
+            <div class="hero-content">
+                <span class="badge-hero">✨ AGENCIA LÍDER EN VIAJES TODO INCLUIDO</span>
+                <h1>Tu Viaje Soñado Listo En Minutos</h1>
+                <p>Vuelos, hoteles de lujo, seguros médicos y guías locales. Nosotros nos encargamos de absolutamente todo.</p>
+                
+                <!-- CONTENEDOR DEL BUSCADOR -->
+                <div class="search-widget">
+                    <div class="search-tabs">
+                        <button class="tab-btn active" onclick="cambiarTab(this, 'vuelohotel')">✈️ Vuelo + Hotel</button>
+                        <button class="tab-btn" onclick="cambiarTab(this, 'hotel')">🏨 Solo Hotel Luxury</button>
+                        <button class="tab-btn" onclick="cambiarTab(this, 'tour')">🏝️ Tour & Experiencia</button>
+                    </div>
+                    
+                    <form class="search-form" onsubmit="event.preventDefault(); buscarViaje();">
+                        <div class="search-grid">
+                            <div class="field-box">
+                                <label for="origen-select">🛫 Origen</label>
+                                <select id="origen-select">
+                                    <option value="Bogotá (BOG)">Bogotá (BOG)</option>
+                                    <option value="Medellín (MDE)">Medellín (MDE)</option>
+                                    <option value="Cali (CLO)">Cali (CLO)</option>
+                                    <option value="Eje Cafetero (MZL/PEI)">Eje Cafetero (MZL/PEI)</option>
+                                    <option value="Barranquilla (BAQ)">Barranquilla (BAQ)</option>
+                                </select>
+                            </div>
+                            <div class="field-box">
+                                <label for="destino-select">🛬 Destino Soñado</label>
+                                <select id="destino-select">
+                                    <option value="San Andrés (Mar de 7 Colores)">San Andrés - Colombia</option>
+                                    <option value="Cancún & Riviera Maya">Cancún - México</option>
+                                    <option value="Punta Cana All-Inclusive">Punta Cana - Rep. Dominicana</option>
+                                    <option value="Eje Cafetero Tradicional">Eje Cafetero - Colombia</option>
+                                    <option value="Cartagena & Islas del Rosario">Cartagena - Colombia</option>
+                                </select>
+                            </div>
+                            <div class="field-box">
+                                <label for="fecha-salida">📅 Fecha Salida</label>
+                                <input type="date" id="fecha-salida" value="2026-06-15">
+                            </div>
+                            <div class="field-box">
+                                <label for="pasajeros-select">👥 Pasajeros</label>
+                                <select id="pasajeros-select">
+                                    <option value="1 Pasajero">1 Pasajero (Solo)</option>
+                                    <option value="2 Pasajeros" selected>2 Pasajeros (Pareja)</option>
+                                    <option value="3 a 4 Pasajeros">3 - 4 Pasajeros (Familia)</option>
+                                    <option value="Grupo (+5)">Grupo (+5 Personas)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn-search-submit">
+                            ⚡ Cotizar Con Un Asesor
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <!-- BANNER RÁPIDO -->
+        <section class="banner-confianza">
+            <div class="container grid-confianza">
+                <div class="item-confianza">
+                    <span class="icono">✈️</span>
+                    <div>
+                        <h4>Tiquetes Aéreos</h4>
+                        <p>Gestionamos tu check-in y equipaje</p>
+                    </div>
+                </div>
+                <div class="item-confianza">
+                    <span class="icono">🏨</span>
+                    <div>
+                        <h4>Hoteles Garantizados</h4>
+                        <p>Alimentación buffet & licores</p>
+                    </div>
+                </div>
+                <div class="item-confianza">
+                    <span class="icono">🛡️</span>
+                    <div>
+                        <h4>Seguro Total 24/7</h4>
+                        <p>Asistencia médica incluida</p>
+                    </div>
+                </div>
+                <div class="item-confianza">
+                    <span class="icono">💬</span>
+                    <div>
+                        <h4>Asesor VIP Directo</h4>
+                        <p>Atención continua por WhatsApp</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECCIÓN DE DESTINOS VIP -->
+        <section id="destinos" class="destinos-section">
+            <div class="container">
+                <h2 class="section-title">Destinos VIP & Paquetes Estrella</h2>
+                <p class="section-subtitle">Disfruta de nuestros paquetes todo incluido con imágenes reales y la mejor asesoría.</p>
+                
+                <div class="grid-destinos">
+                    
+                    <!-- Tarjeta 1: San Andrés -->
+                    <div class="card">
+                        <div class="card-img" style="background-image: url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80');">
+                            <span class="card-tag nacional">Nacional</span>
+                        </div>
+                        <div class="card-content">
+                            <h3>San Andrés: Mar de 7 Colores</h3>
+                            <p class="precio">$ 1.850.000 COP <span>/ por persona</span></p>
+                            <p class="card-desc">Sumérgete en las cristalinas aguas de San Andrés. Disfruta de playas paradisíacas, atardeceres mágicos y un ambiente caribeño único con todo resuelto.</p>
+                            <ul class="detalles-paquete">
+                                <li>✈️ <strong>Vuelos:</strong> Tiquetes ida y vuelta</li>
+                                <li>🏨 <strong>Hotel:</strong> 4 Noches / 5 Días frente al mar</li>
+                                <li>🍽️ <strong>Comida:</strong> Sistema All-Inclusive (Todo incluido)</li>
+                                <li>🏝️ <strong>Tours:</strong> Excursión a Johnny Cay y Haynes Cay</li>
+                                <li>🛡️ <strong>Seguro:</strong> Póliza de asistencia médica total</li>
+                            </ul>
+                            <button class="btn-card" onclick="abrirModal('San Andrés: Mar de 7 Colores', '$ 1.850.000 COP')">Reservar con Asesor</button>
+                        </div>
+                    </div>
+
+                    <!-- Tarjeta 2: Cancún -->
+                    <div class="card destaque">
+                        <div class="badge-recomendado">🔥 MÁS POPULAR</div>
+                        <div class="card-img" style="background-image: url('https://images.unsplash.com/photo-1512100356356-de1b84283e18?auto=format&fit=crop&w=800&q=80');">
+                            <span class="card-tag internacional">Internacional</span>
+                        </div>
+                        <div class="card-content">
+                            <h3>Cancún & Riviera Maya</h3>
+                            <p class="precio">$ 3.450.000 COP <span>/ por persona</span></p>
+                            <p class="card-desc">Vive el lujo del Caribe mexicano. Arena blanca, ruinas mayas ancestrales, parques temáticos de categoría mundial y resorts exclusivos.</p>
+                            <ul class="detalles-paquete">
+                                <li>✈️ <strong>Vuelos:</strong> Tiquetes internacionales listos</li>
+                                <li>🏨 <strong>Resort:</strong> 5 Noches en Resort 5 Estrellas</li>
+                                <li>🍽️ <strong>Comida:</strong> Buffet gourmet y bebidas ilimitadas</li>
+                                <li>🗿 <strong>Tour:</strong> Chichén Itzá + Cenote Sagrado</li>
+                                <li>🛡️ <strong>Seguro:</strong> Cobertura médica internacional</li>
+                            </ul>
+                            <button class="btn-card btn-destaque" onclick="abrirModal('Cancún & Riviera Maya', '$ 3.450.000 COP')">Reservar con Asesor</button>
+                        </div>
+                    </div>
+
+                    <!-- Tarjeta 3: Eje Cafetero -->
+                    <div class="card">
+                        <div class="card-img" style="background-image: url('https://images.unsplash.com/photo-1589556264800-08ae9e129a8c?auto=format&fit=crop&w=800&q=80');">
+                            <span class="card-tag nacional">Nacional</span>
+                        </div>
+                        <div class="card-content">
+                            <h3>Magia del Eje Cafetero</h3>
+                            <p class="precio">$ 1.200.000 COP <span>/ por persona</span></p>
+                            <p class="card-desc">Conecta con la naturaleza, los paisajes montañosos y el mejor café del mundo en una hermosa finca típica tradicional.</p>
+                            <ul class="detalles-paquete">
+                                <li>🚌 <strong>Transporte:</strong> Traslados privados incluidos</li>
+                                <li>🏨 <strong>Alojamiento:</strong> Finca campestre típica (3 Noches)</li>
+                                <li>🍽️ <strong>Comida:</strong> Desayunos y cenas típicas</li>
+                                <li>☕ <strong>Tour:</strong> Ingreso a Parque del Café y Salento</li>
+                                <li>🛡️ <strong>Seguro:</strong> Asistencia médica nacional</li>
+                            </ul>
+                            <button class="btn-card" onclick="abrirModal('Magia del Eje Cafetero', '$ 1.200.000 COP')">Reservar con Asesor</button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- 📸 GALERÍA DE FOTOS -->
+        <section id="galeria" class="galeria-section">
+            <div class="container">
+                <h2 class="section-title">Galería de Destinos</h2>
+                <p class="section-subtitle">Un vistazo visual a los lugares increíbles que puedes visitar con nosotros.</p>
+                
+                <div class="grid-galeria">
+                    <div class="galeria-item">
+                        <img src="imagenes/imagen.jpg" alt="San Andrés Playas">
+                        <div class="galeria-overlay"><span>San Andrés, Colombia</span></div>
+                    </div>
+                    <div class="galeria-item">
+                        <img src="imagenes/imagen2.jpg" alt="Cancún Resort">
+                        <div class="galeria-overlay"><span>Cancún, México</span></div>
+                    </div>
+                    <div class="galeria-item">
+                        <img src="imagenes/imagen3.jpg" alt="Eje Cafetero Paisaje">
+                        <div class="galeria-overlay"><span>Eje Cafetero, Colombia</span></div>
+                    </div>
+                    <div class="galeria-item">
+                        <img src="imagenes/imagen4.jpg" alt="Punta Cana Playa">
+                        <div class="galeria-overlay"><span>Punta Cana, Rep. Dominicana</span></div>
+                    </div>
+                    <div class="galeria-item">
+                        <img src="imagenes/imagen5.jpg" alt="Cartagena Murallas">
+                        <div class="galeria-overlay"><span>Cartagena, Colombia</span></div>
+                    </div>
+                    <div class="galeria-item">
+                        <img src="imagenes/imagen6.jpg" alt="Riviera Maya Mar">
+                        <div class="galeria-overlay"><span>Riviera Maya, México</span></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECCIÓN: ¿POR QUÉ ELEGIRNOS? -->
+        <section id="elegirnos" class="elegirnos-section">
+            <div class="container">
+                <h2 class="section-title">¿Por Qué Elegir Odisea Global?</h2>
+                <p class="section-subtitle">No somos solo una plataforma automática; somos tu equipo de respaldo antes, durante y después de tus vacaciones.</p>
+                
+                <div class="grid-elegirnos">
+                    <div class="elegirnos-card">
+                        <div class="elegirnos-icono">🎧</div>
+                        <h3>Asesor Personal Dedicado</h3>
+                        <p>Olvídate de hablar con bots o esperar horas al teléfono. Tendrás el WhatsApp directo de un experto que resolverá tus preguntas al instante.</p>
+                    </div>
+                    <div class="elegirnos-card">
+                        <div class="elegirnos-icono">💎</div>
+                        <h3>Garantía de Mejor Tarifa</h3>
+                        <p>Negociamos directamente con hoteles y aerolíneas para darte paquetes con todo incluido sin costos ocultos ni sorpresas al llegar.</p>
+                    </div>
+                    <div class="elegirnos-card">
+                        <div class="elegirnos-icono">📲</div>
+                        <h3>Gestión 100% Sin Estrés</h3>
+                        <p>Hacemos tu check-in, te enviamos los pases de abordar en PDF a tu celular y coordinamos los traslados desde el aeropuerto hasta el hotel.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECCIÓN: SEGURO Y GARANTÍA -->
+        <section id="seguridad" class="seguridad-section">
+            <div class="container">
+                <div class="seguridad-box">
+                    <div class="seguridad-info">
+                        <span class="badge-seguro">🛡️ COBERTURA TOTAL INCLUIDA</span>
+                        <h2>Viaja Tranquilo Con Nuestra Póliza de Protección</h2>
+                        <p>Cada paquete reservado en <strong>Odisea Global</strong> incluye una tarjeta de asistencia médica e internacional para que viajes respaldado ante cualquier eventualidad.</p>
+                        
+                        <ul class="lista-seguro">
+                            <li>🏥 <strong>Asistencia Médica y Urgencias:</strong> Cobertura por enfermedad de origen agudo o accidentes en el viaje.</li>
+                            <li>💊 <strong>Medicamentos de Urgencia:</strong> Gastos farmacéuticos cubiertos sin desembolsos imprevistos.</li>
+                            <li>🧳 <strong>Localización de Equipaje:</strong> Rastreo y compensación en caso de demora o pérdida de maletas.</li>
+                            <li>✈️ <strong>Reprogramación de Vuelos:</strong> Soporte ante demoras severas o cancelación de vuelos.</li>
+                        </ul>
+                    </div>
+                    <div class="seguridad-badge-card">
+                        <div class="badge-shield">🛡️</div>
+                        <h3>100% Protegido</h3>
+                        <p>Asistencia telefónica y por WhatsApp 24 horas al día en tu idioma.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TESTIMONIOS -->
+        <section id="testimonios" class="testimonios-section">
+            <div class="container">
+                <h2 class="section-title">Experiencias Reales</h2>
+                <p class="section-subtitle">Lo que opinan nuestros clientes tras viajar con Odisea Global.</p>
+                
+                <div class="grid-testimonios">
+                    <div class="testimonio-card">
+                        <div class="estrellas">⭐⭐⭐⭐⭐</div>
+                        <p class="comentario">"El servicio por WhatsApp fue impecable. Nos enviaron pases de abordar, reservaron el hotel y el seguro nos dio muchísima paz en San Andrés."</p>
+                        <h4>— Laura Sofía & Familia</h4>
+                    </div>
+                    <div class="testimonio-card">
+                        <div class="estrellas">⭐⭐⭐⭐⭐</div>
+                        <p class="comentario">"Tenía incertidumbre por ser mi primer viaje internacional a Cancún, pero los asesores se encargaron de todo. ¡Experiencia 10/10!"</p>
+                        <h4>— Juan Diego Morales</h4>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ♿ MENÚ DE ACCESIBILIDAD FLOTANTE -->
+        <div class="accessibility-widget">
+            <button class="btn-accesibilidad" onclick="toggleMenuAccesibilidad()" title="Opciones de Accesibilidad" aria-label="Abrir Menú de Accesibilidad">
+                ♿
+            </button>
+            <div id="accessibility-menu" class="accessibility-menu">
+                <h4>Accesibilidad</h4>
+                <button onclick="cambiarTamanoTexto(1.1)">🔍 Aumentar Texto</button>
+                <button onclick="cambiarTamanoTexto(0.9)">🔍 Reducir Texto</button>
+                <button onclick="toggleAltoContraste()">🎨 Alto Contraste</button>
+                <button onclick="resetAccesibilidad()">🔄 Restablecer</button>
+            </div>
+        </div>
+
+        <!-- 💬 BOTÓN FLOTANTE DE WHATSAPP -->
+        <a href="https://wa.me/573113924038?text=Hola,%20quiero%20información%20de%20viajes%20con%20Odisea%20Global" class="btn-whatsapp-flotante" target="_blank" aria-label="WhatsApp Asesores">
+            <svg viewBox="0 0 32 32" class="icono-wa">
+                <path fill="#ffffff" d="M16 2a13 13 0 0 0-11 20L3 29l7.2-1.9A13 13 0 1 0 16 2zm0 23.6a10.6 10.6 0 0 1-5.4-1.5l-.4-.2-4 1 1-3.9-.3-.4A10.6 10.6 0 1 1 16 25.6zm5.8-7.9c-.3-.2-1.9-1-2.2-1.1s-.5-.2-.7.2-.8 1-1 1.2-.4.2-.7 0a9 9 0 0 1-2.6-1.6 10 10 0 0 1-1.8-2.3c-.2-.3 0-.5.1-.7l.5-.6c.2-.2.2-.4.3-.6a.6.6 0 0 0 0-.6c-.1-.2-.7-1.7-1-2.3s-.5-.5-.7-.5h-.6a1.2 1.2 0 0 0-.9.4 3.7 3.7 0 0 0-1.2 2.7 6.4 6.4 0 0 0 1.3 3.4 14.7 14.7 0 0 0 5.7 5 6.6 6.6 0 0 0 3.3.8 2.8 2.8 0 0 0 1.9-1.3 2.3 2.3 0 0 0 .2-1.3c-.2-.1-.5-.2-.8-.3z"/>
+            </svg>
+            <span class="tooltip-wa">Chatea con un asesor</span>
+        </a>
+
+        <!-- MODAL INTERACTIVO DE RESERVA -->
+        <div id="modal-reserva" class="modal-overlay">
+            <div class="modal-card">
+                <button class="btn-cerrar-modal" onclick="cerrarModal()">✕</button>
+                <h3 id="modal-titulo">Cotizar Paquete</h3>
+                <p id="modal-precio" class="modal-precio-tag">$ 0 COP</p>
+                <p class="modal-desc">Déjanos tus datos para enviarte el itinerario completo con vuelos, hotel y seguro médico directamente a tu WhatsApp.</p>
+                
+                <div class="modal-form">
+                    <div class="input-grupo-modal">
+                        <label for="cliente-nombre">Tu Nombre Completo (Solo letras)</label>
+                        <input type="text" id="cliente-nombre" placeholder="Ej: Joel Giraldo">
+                    </div>
+                    <div class="input-grupo-modal">
+                        <label for="cliente-tel">Número de Celular / WhatsApp (Solo números)</label>
+                        <input type="tel" id="cliente-tel" placeholder="Ej: 3113924038">
+                    </div>
+                    <button class="btn-enviar-wa" onclick="enviarWhatsAppModal()">
+                        💬 Confirmar & Enviar a WhatsApp
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- FOOTER -->
+        <footer class="site-footer">
+            <div class="container footer-flex">
+                <div>
+                    <h3>🌍 Odisea<span>Global</span></h3>
+                    <p>Tu agencia de confianza para viajes inolvidables.</p>
+                </div>
+                <div class="sociales">
+                    <a href="https://wa.me/573113924038" target="_blank">WhatsApp Directo: 311 392 4038</a>
+                </div>
+            </div>
+        </footer>
+
+    </div>
+
+    <!-- JAVASCRIPT DE FUNCIONALIDADES, BLOQUEO EN TIEMPO REAL, ROLES Y PANEL PRO -->
+    <script>
+        let tipoViajeActual = 'Vuelo + Hotel';
+        let paqueteSeleccionado = '';
+        let precioSeleccionado = '';
+        let tamanoActual = 1;
+        let rolActual = 'cliente';
+
+        // 🔒 BLOQUEO EN TIEMPO REAL AL ESCRIBIR EN TODOS LOS FORMULARIOS
+        document.addEventListener('DOMContentLoaded', () => {
+            const camposSoloLetras = ['reg-nombre', 'cliente-nombre'];
+            const camposSoloNumeros = ['reg-tel', 'cliente-tel'];
+
+            // 1. Bloquear números y símbolos (Solo letras, tildes y espacios, máx 40 caracteres)
+            camposSoloLetras.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.setAttribute('maxlength', '40');
+
+                    el.addEventListener('keydown', (e) => {
+                        const teclasPermitidas = ['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab', ' '];
+                        if (teclasPermitidas.includes(e.key)) return;
+                        
+                        if (/[0-9]/.test(e.key)) {
+                            e.preventDefault();
+                        }
+                    });
+
+                    el.addEventListener('input', (e) => {
+                        e.target.value = e.target.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '');
+                    });
+                }
+            });
+
+            // 2. Bloquear letras y símbolos (Solo números, máx 10 dígitos)
+            camposSoloNumeros.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.setAttribute('maxlength', '10');
+
+                    el.addEventListener('keydown', (e) => {
+                        const teclasPermitidas = ['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab'];
+                        if (teclasPermitidas.includes(e.key)) return;
+
+                        if (!/[0-9]/.test(e.key)) {
+                            e.preventDefault();
+                        }
+                    });
+
+                    el.addEventListener('input', (e) => {
+                        let valor = e.target.value.replace(/[^0-9]/g, '');
+                        if (valor.length > 10) {
+                            valor = valor.slice(0, 10);
+                        }
+                        e.target.value = valor;
+                    });
+                }
+            });
+        });
+
+        // 🔀 CAMBIAR VISTA DEL FORMULARIO SEGÚN EL ROL SELECCIONADO
+        function cambiarVistaRolFormulario() {
+            const rol = document.getElementById('reg-rol').value;
+            const grupoAdminPass = document.getElementById('grupo-admin-pass');
+            const inputNombre = document.getElementById('reg-nombre');
+
+            if (rol === 'admin') {
+                grupoAdminPass.style.display = 'block';
+                inputNombre.value = 'Joel'; // Asigna por defecto el nombre requerido para admin
+            } else {
+                grupoAdminPass.style.display = 'none';
+                inputNombre.value = '';
+            }
+        }
+
+        // 🛡️ VERIFICAR ACCESO CON ROLES Y CÓDIGO ENCRIPTADO
+        function verificarAccesoRol() {
+            const rol = document.getElementById('reg-rol').value;
+            const nombreInput = document.getElementById('reg-nombre').value.trim();
+            const telInput = document.getElementById('reg-tel').value.trim();
+
+            if (!nombreInput || !telInput) {
+                alert('Por favor completa todos los campos requeridos.');
+                return;
+            }
+
+            if (telInput.length !== 10) {
+                alert('El número de celular debe tener exactamente 10 dígitos.');
+                return;
+            }
+
+            if (rol === 'admin') {
+                const codigoIngresado = document.getElementById('reg-admin-pass').value.trim();
+                const codigoSecretoAdmin = '33022998014';
+
+                // Validación estricta para el Administrador
+                if (nombreInput.toLowerCase() !== 'joel' || codigoIngresado !== codigoSecretoAdmin) {
+                    alert('❌ Acceso denegado. Nombre de administrador o código secreto incorrectos.');
+                    return;
+                }
+
+                rolActual = 'admin';
+                alert('✅ ¡Acceso concedido como Administrador (Joel)!');
+            } else {
+                rolActual = 'cliente';
+                alert(`✅ ¡Bienvenido cliente ${nombreInput} a Odisea Global!`);
+            }
+
+            // Ocultar muro de acceso y revelar la página web
+            document.getElementById('muro-registro').style.display = 'none';
+            document.getElementById('contenido-web').style.display = 'block';
+
+            // Adaptar interfaz según el rol
+            adaptarVistaSegunRol();
+        }
+
+        // 🎨 ADAPTAR LA PÁGINA SEGÚN EL ROL DE ACCESO
+        function adaptarVistaSegunRol() {
+            const panelAdmin = document.getElementById('panel-admin-exclusivo');
+
+            if (rolActual === 'admin') {
+                if (panelAdmin) panelAdmin.style.display = 'block';
+
+                // Agregar botones de edición de inventario en cada tarjeta de destino
+                document.querySelectorAll('.card-content').forEach((card, index) => {
+                    if (card.querySelector('.admin-only-ctrl')) return;
+
+                    const btnAdminCtrl = document.createElement('div');
+                    btnAdminCtrl.className = 'admin-only-ctrl';
+                    btnAdminCtrl.style.marginTop = '10px';
+                    btnAdminCtrl.style.padding = '8px';
+                    btnAdminCtrl.style.background = '#eee';
+                    btnAdminCtrl.style.borderRadius = '5px';
+                    btnAdminCtrl.style.display = 'flex';
+                    btnAdminCtrl.style.gap = '5px';
+                    btnAdminCtrl.innerHTML = `
+                        <button onclick="alert('Editar precio del Paquete ${index + 1}')" style="background:#2e86de; color:#fff; border:none; padding:4px 8px; border-radius:3px; cursor:pointer; font-size:11px;">✏️ Editar Precio</button>
+                        <button onclick="alert('Paquete ${index + 1} pausado en catálogo')" style="background:#ee5253; color:#fff; border:none; padding:4px 8px; border-radius:3px; cursor:pointer; font-size:11px;">🚫 Pausar Venta</button>
+                    `;
+                    card.appendChild(btnAdminCtrl);
+                });
+            } else {
+                if (panelAdmin) panelAdmin.style.display = 'none';
+            }
+        }
+
+        // 🔀 CAMBIAR ENTRE PESTAÑAS DEL PANEL DE ADMINISTRACIÓN
+        function cambiarSeccionAdmin(seccion, btn) {
+            document.getElementById('admin-sec-metricas').style.display = 'none';
+            document.getElementById('admin-sec-leads').style.display = 'none';
+            document.getElementById('admin-sec-inventario').style.display = 'none';
+
+            document.querySelectorAll('.tab-admin').forEach(b => {
+                b.style.background = 'transparent';
+                b.style.color = '#94a3b8';
+            });
+
+            document.getElementById(`admin-sec-${seccion}`).style.display = 'block';
+            btn.style.background = '#1e293b';
+            btn.style.color = '#38bdf8';
+        }
+
+        // 🔍 FILTRO EN TIEMPO REAL PARA LA TABLA DE LEADS
+        function filtrarTablaLeads() {
+            const input = document.getElementById('filter-lead').value.toLowerCase();
+            const filas = document.querySelectorAll('#tabla-leads-admin tbody tr');
+
+            filas.forEach(fila => {
+                const nombre = fila.children[0].innerText.toLowerCase();
+                if (nombre.includes(input)) {
+                    fila.style.display = '';
+                } else {
+                    fila.style.display = 'none';
+                }
+            });
+        }
+
+        // ✅ CAMBIAR ESTADO DE UN LEAD A CONTACTADO
+        function cambiarEstadoLead(btn) {
+            const celdaEstado = btn.parentElement.parentElement.querySelector('.badge-status');
+            celdaEstado.style.background = '#10b98122';
+            celdaEstado.style.color = '#10b981';
+            celdaEstado.innerText = '✅ Contactado';
+            btn.remove();
+        }
+
+        // 💬 CONTACTAR AL CLIENTE DIRECTO POR WHATSAPP DESDE EL PANEL
+        function contactarClienteWA(telefono, nombre) {
+            const mensaje = encodeURIComponent(`Hola ${nombre}, te saludamos de Odisea Global. Vemos que cotizaste un paquete turístico con nosotros, ¿en qué podemos ayudarte?`);
+            window.open(`https://wa.me/57${telefono}?text=${mensaje}`, '_blank');
+        }
+
+        // 🔄 SIMULADOR DE ACTUALIZACIÓN DE DATOS EN TIEMPO REAL
+        function actualizarMetricasSimuladas() {
+            const kpiVentas = document.getElementById('kpi-ventas');
+            const barVentas = document.getElementById('bar-ventas');
+
+            kpiVentas.style.opacity = '0.4';
+            setTimeout(() => {
+                kpiVentas.innerText = '$ 56.800.000 COP';
+                barVentas.style.width = '92%';
+                kpiVentas.style.opacity = '1';
+                alert('📊 ¡Métricas sincronizadas con la base de datos!');
+            }, 500);
+        }
+
+        function cambiarTab(btn, tipo) {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            if(tipo === 'vuelohotel') tipoViajeActual = 'Vuelo + Hotel';
+            if(tipo === 'hotel') tipoViajeActual = 'Solo Hotel';
+            if(tipo === 'tour') tipoViajeActual = 'Tour & Experiencia';
+        }
+
+        function buscarViaje() {
+            const origen = document.getElementById('origen-select').value;
+            const destino = document.getElementById('destino-select').value;
+            const fecha = document.getElementById('fecha-salida').value;
+            const pasajeros = document.getElementById('pasajeros-select').value;
+
+            paqueteSeleccionado = `Cotización (${tipoViajeActual}): ${origen} ➔ ${destino}`;
+            precioSeleccionado = `Fecha: ${fecha} | ${pasajeros}`;
+            
+            abrirModal(paqueteSeleccionado, precioSeleccionado);
+        }
+
+        function abrirModal(titulo, precio) {
+            paqueteSeleccionado = titulo;
+            precioSeleccionado = precio;
+            document.getElementById('modal-titulo').innerText = titulo;
+            document.getElementById('modal-precio').innerText = precio;
+            document.getElementById('modal-reserva').classList.add('active');
+        }
+
+        function cerrarModal() {
+            document.getElementById('modal-reserva').classList.remove('active');
+        }
+
+        function enviarWhatsAppModal() {
+            const nombre = document.getElementById('cliente-nombre').value.trim();
+            const tel = document.getElementById('cliente-tel').value.trim();
+
+            if(!nombre || !tel) {
+                alert('Por favor completa tu nombre y número de teléfono.');
+                return;
+            }
+
+            if (tel.length !== 10) {
+                alert('El número de celular debe tener exactamente 10 dígitos.');
+                return;
+            }
+
+            const mensaje = encodeURIComponent(`¡Hola Odisea Global! Deseo cotizar el paquete:\n📌 *${paqueteSeleccionado}*\n💰 *${precioSeleccionado}*\n\n👤 *Nombre:* ${nombre}\n📱 *Teléfono:* ${tel}`);
+            window.open(`https://wa.me/573113924038?text=${mensaje}`, '_blank');
+            cerrarModal();
+        }
+
+        function toggleMenuAccesibilidad() {
+            const menu = document.getElementById('accessibility-menu');
+            menu.classList.toggle('active');
+        }
+
+        function cambiarTamanoTexto(factor) {
+            tamanoActual *= factor;
+            if (tamanoActual < 0.8) tamanoActual = 0.8;
+            if (tamanoActual > 1.4) tamanoActual = 1.4;
+            document.body.style.zoom = tamanoActual;
+        }
+
+        function toggleAltoContraste() {
+            document.body.classList.toggle('alto-contraste');
+        }
+
+        function resetAccesibilidad() {
+            tamanoActual = 1;
+            document.body.style.zoom = "100%";
+            document.body.classList.remove('alto-contraste');
+        }
+    </script>
+</body>
+</html>
